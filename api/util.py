@@ -30,8 +30,6 @@ def ordenaMaterias(grade: Turma):
     materias = []
     for turma in grade:
         dias, periodo, hora = converteTempo(turma.horario)
-        hora = hora.strip()
-        # print(f"'{turma.horario}'", f"'{dias}'", f"'{periodo}'", f"'{hora}'")
         horaInicio = horarios[periodo][int(hora[0]) - 1]
         horaFim = horarios[periodo][int(hora[1]) - 1] + (tempoAulaNoite if periodo == "N" else tempoAula)
         turma.horario = [dias, periodo, horaInicio, horaFim]
