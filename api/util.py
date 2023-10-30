@@ -1,68 +1,51 @@
-import csv
-import pandas as pd
-from datetime import datetime
-import time
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
+from datetime import time, timedelta
 
-def gerarConsulta(nivel, depto, ano, periodo, listaTurmasColetadas):
-    servico = Service(ChromeDriverManager().install())
-    opcoes = webdriver.ChromeOptions()
-    opcoes.add_experimental_option('excludeSwitches', ['enable-logging'])
-    navegador = webdriver.Chrome(service=servico, options=opcoes)
-    url = 'https://sigaa.unb.br/sigaa/public/turmas/listar.jsf?aba=p-ensino'
-    navegador.get(url)
- 
-    navegador.find_element(By.NAME, 'formTurma:inputNivel').send_keys(nivel)
-    navegador.find_element(By.NAME, 'formTurma:inputDepto').send_keys(depto)
-    navegador.find_element(By.NAME, 'formTurma:inputAno').clear()
-    navegador.find_element(By.NAME, 'formTurma:inputAno').send_keys(ano)
-    navegador.find_element(By.NAME, 'formTurma:inputPeriodo').send_keys(periodo)
-    navegador.find_element(By.NAME, 'formTurma:j_id_jsp_1370969402_11').click()
+class Turma:
+    def __init__(self, nome, professor, horario):
+        self.nome = nome
+        self.professor = professor
+        self.horario = horario
 
-    time.sleep(2)
-    coletarTurmas(navegador, listaTurmasColetadas)
-    navegador.quit()
-    return listaTurmasColetadas
+# Interval Scheduling
+tempoAula = timedelta(minutes=55)
+tempoAulaNoite = timedelta(minutes=50)
 
-def coletarTurmas(navegador, listaTurmasColetadas):
-    listaTodosElementosDaPagina = navegador.find_elements(By.XPATH, '//*[@id="turmasAbertas"]/table/tbody/tr')
-    listaCodigoTurma = navegador.find_elements(By.CLASS_NAME, "turma")
-    listaProfCargaHor = navegador.find_elements(By.CLASS_NAME, "nome")
-    listaAnoSemestre = navegador.find_elements(By.CLASS_NAME, "anoPeriodo")
-    listaHorario = (navegador.find_elements(By.XPATH, "//*[@id='turmasAbertas']/table/tbody/tr//td[4]"))
-    listaVagasOfertadas = navegador.find_elements(By.XPATH, '//*[@id="turmasAbertas"]/table/tbody/tr/td[6]')
-    listaVagasOcupadas = navegador.find_elements(By.XPATH, '//*[@id="turmasAbertas"]/table/tbody/tr/td[7]')
-    listaLocal = (navegador.find_elements(By.XPATH, "//*[@id='turmasAbertas']/table/tbody/tr//td[8]"))
+horarios = {
+    "M": [timedelta(hours=8, minutes=0), timedelta(hours=8, minutes=55), timedelta(hours=10, minutes=0), timedelta(hours=10, minutes=55), timedelta(hours=12, minutes=55)],
+    "T": [timedelta(hours=12, minutes=55), timedelta(hours=14, minutes=0), timedelta(hours=14, minutes=55), timedelta(hours=16, minutes=0), timedelta(hours=16, minutes=55), timedelta(hours=18, minutes=0), timedelta(hours=18, minutes=55)],
+    "N": [timedelta(hours=19, minutes=0), timedelta(hours=19, minutes=50), timedelta(hours=20, minutes=50), timedelta(hours=21, minutes=40)]
+}
 
-    indLinhaAcumulada = 0
-    indCabecalhoAtual = 0
-    
-    for linhaAtual in listaTodosElementosDaPagina:
-        if linhaAtual.get_attribute("class") == 'agrupador':
-            linhaCabecalho = linhaAtual.find_elements(By.XPATH, "//span[@class='tituloDisciplina']")[indCabecalhoAtual]
-            codigoNomeMateria = linhaCabecalho.get_attribute('innerHTML')
-            indCabecalhoAtual += 1
-        if linhaAtual.get_attribute("class") == 'linhaPar' or linhaAtual.get_attribute("class") == 'linhaImpar':
-            local = listaLocal[indLinhaAcumulada].get_attribute('innerText').strip()
-            profCargaHor = listaProfCargaHor[indLinhaAcumulada].get_attribute('innerHTML')
-            profCargaHor = profCargaHor.strip().split(" (")
-            professor, cargahoraria = profCargaHor[0], profCargaHor[1][:3]
-            codigoTurma = listaCodigoTurma[indLinhaAcumulada].get_attribute('innerHTML')
-            anoSemestre = listaAnoSemestre[indLinhaAcumulada].get_attribute('innerHTML')
-            ano, semestre = anoSemestre.split(".")
-            horario = listaHorario[indLinhaAcumulada].get_attribute('innerText').strip()
-            vagasOfertadas = listaVagasOfertadas[indLinhaAcumulada].get_attribute('innerHTML')
-            vagasOcupadas = listaVagasOcupadas[indLinhaAcumulada].get_attribute('innerHTML')
-            listaTurmasColetadas.append([codigoNomeMateria, professor, horario])
-            indLinhaAcumulada += 1
-    return listaTurmasColetadas
+def converteTempo(materia):
+    dias = ""
+    i = 0
+    while materia[i].isdigit():
+        dias += materia[i]
+        i += 1
+    periodo = materia[i]
+    hora = materia[i + 1:]
+    return dias, periodo, hora
 
-listaTurmasColetadas = []
-gerarConsulta('GRADUAÇÃO', 'FACULDADE DO GAMA - BRASÍLIA', '2023', '2', listaTurmasColetadas)
+def ordenaMaterias(grade: Turma):
+    materias = []
+    for turma in grade:
+        dias, periodo, hora = converteTempo(turma.horario)
+        horaInicio = horarios[periodo][int(hora[0]) - 1]
+        horaFim = horarios[periodo][int(hora[1]) - 1] + (tempoAulaNoite if periodo == "N" else tempoAula)
+        turma.horario = [dias, periodo, horaInicio, horaFim]
+        materias.append(turma)
+    return sorted(materias, key=lambda x: x.horario[3])
 
-with open("turmas.txt", 'a') as file:
-    for item in listaTurmasColetadas:
-        file.write("%s\n" % ",".join(item))
+def interval_scheduling(grade):
+    grade = ordenaMaterias(grade)
+    gradeOtima = []
+    ultimoHorarioFim = None
+    ultimoDiasAula = ""
+    for turma in grade:
+        horario_inicio = turma.horario[2]
+        diasAula = turma.horario[0]
+        if ultimoHorarioFim is None or horario_inicio >= ultimoHorarioFim or ultimoDiasAula != diasAula:
+            gradeOtima.append(turma)
+            ultimoHorarioFim = turma.horario[3]
+            ultimoDiasAula = diasAula
+    return gradeOtima
