@@ -6,5 +6,6 @@ turmas = [Turma(turma.split(",")[0], turma.split(",")[1], turma.split(",")[2]) f
 class ClassroomsForm(forms.Form):
     choices = forms.MultipleChoiceField(
         choices=[(i, f"{turmas[i].nome} | {turmas[i].professor.title()} | {turmas[i].horario}") for i in range(len(turmas))],
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-scroll'}),
+        label='',
     )
