@@ -5,7 +5,8 @@ class Turma:
         self.nome = nome
         self.professor = professor
         self.horario = horario
-
+        self.strHorario = horario
+        
 # Interval Scheduling
 tempoAula = timedelta(minutes=55)
 tempoAulaNoite = timedelta(minutes=50)

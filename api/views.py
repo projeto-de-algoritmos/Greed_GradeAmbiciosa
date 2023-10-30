@@ -2,9 +2,11 @@ from django.shortcuts import render
 from .forms import ClassroomsForm
 from .util import interval_scheduling, Turma
 
-turmas = [Turma(turma.split(",")[0], turma.split(",")[1], turma.split(",")[2]) for turma in open("turmas.txt", 'r').readlines()]
+def lerTurmas():
+    return [Turma(turma.split(",")[0], turma.split(",")[1], turma.split(",")[2]) for turma in open("turmas.txt", 'r').readlines()]
 
 def index(request):
+    turmas = lerTurmas()
     if request.method == 'POST':
         form = ClassroomsForm(request.POST)
         if form.is_valid():
