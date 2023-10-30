@@ -9,3 +9,4 @@ class ClassroomsForm(forms.Form):
         widget=forms.CheckboxSelectMultiple(attrs={'class': 'checkbox-scroll'}),
         label='',
     )
+    limpar = forms.BooleanField(required=False, initial=False, widget=forms.HiddenInput())

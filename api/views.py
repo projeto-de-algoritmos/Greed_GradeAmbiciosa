@@ -8,8 +8,11 @@ def index(request):
     if request.method == 'POST':
         form = ClassroomsForm(request.POST)
         if form.is_valid():
-            selected_choices = form.cleaned_data['choices']
-            resultado = interval_scheduling([turmas[int(i)] for i in selected_choices])
-            return render(request, 'api/index.html', {'form': form, 'resultado': resultado})
+            if form.cleaned_data['limpar']:
+                form = ClassroomsForm()
+            else:
+                selected_choices = form.cleaned_data['choices']
+                resultado = interval_scheduling([turmas[int(i)] for i in selected_choices])
+                return render(request, 'api/index.html', {'form': form, 'resultado': resultado})
     else: form = ClassroomsForm()
     return render(request, 'api/index.html', {'form': form})
