@@ -1,12 +1,14 @@
 from datetime import time, timedelta
 
+
 class Turma:
     def __init__(self, nome, professor, horario):
         self.nome = nome
         self.professor = professor
         self.horario = horario
         self.strHorario = horario
-        
+
+
 # Interval Scheduling
 tempoAula = timedelta(minutes=55)
 tempoAulaNoite = timedelta(minutes=50)
@@ -16,6 +18,7 @@ horarios = {
     "T": [timedelta(hours=12, minutes=55), timedelta(hours=14, minutes=0), timedelta(hours=14, minutes=55), timedelta(hours=16, minutes=0), timedelta(hours=16, minutes=55), timedelta(hours=18, minutes=0), timedelta(hours=18, minutes=55)],
     "N": [timedelta(hours=19, minutes=0), timedelta(hours=19, minutes=50), timedelta(hours=20, minutes=50), timedelta(hours=21, minutes=40)]
 }
+
 
 def converteTempo(materia):
     dias = ""
@@ -27,6 +30,7 @@ def converteTempo(materia):
     hora = materia[i + 1:]
     return dias, periodo, hora
 
+
 def ordenaMaterias(grade: Turma):
     materias = []
     for turma in grade:
@@ -36,6 +40,7 @@ def ordenaMaterias(grade: Turma):
         turma.horario = [dias, periodo, horaInicio, horaFim]
         materias.append(turma)
     return sorted(materias, key=lambda x: x.horario[3])
+
 
 def interval_scheduling(grade):
     grade = ordenaMaterias(grade)

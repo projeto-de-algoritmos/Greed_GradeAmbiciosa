@@ -36,9 +36,19 @@
                              <h3 class="card-title">Selecione entre as turmas abaixo</h3>
                            </div>
                            <form method="post">
+                              {% csrf_token %}
+                              <div class="card-header">
+                                 {{ form.search.label_tag }}
+                                 {{ form.search }}
+                                 <button type="submit">Buscar</button>
+                              </div>
                               <div class="card-body">
-                                 {% csrf_token %}
-                                 {{ form }}
+                                 <!-- {% csrf_token %} -->
+                                 <!-- {{ form.search.label_tag }}
+                                 {{ form.search }}
+                                 <button type="submit">Buscar</button>
+                                 <br><br> -->
+                                 {{ form.choices }}   
                               </div>
                               <div class="card-footer">
                                  <button type="submit" class="btn btn-primary">Submit</button>
