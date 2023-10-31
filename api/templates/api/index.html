@@ -3,8 +3,8 @@
    <head>
       <style>
          .checkbox-scroll {
-             max-height: 65vh; /* Defina a altura máxima desejada para a lista de checkboxes */
-             overflow-y: auto; /* Adicione uma barra de rolagem se a altura máxima for excedida */
+             max-height: 65vh;
+             overflow-y: auto;
          }
      </style>
       <meta charset="utf-8">
@@ -40,14 +40,9 @@
                               <div class="card-header">
                                  {{ form.search.label_tag }}
                                  {{ form.search }}
-                                 <button type="submit">Buscar</button>
+                                 <button type="submit" class="btn btn-primary" >Buscar</button>
                               </div>
                               <div class="card-body">
-                                 <!-- {% csrf_token %} -->
-                                 <!-- {{ form.search.label_tag }}
-                                 {{ form.search }}
-                                 <button type="submit">Buscar</button>
-                                 <br><br> -->
                                  {{ form.choices }}   
                               </div>
                               <div class="card-footer">
