@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
    <head>
+      <style>
+         .checkbox-scroll {
+             max-height: 65vh;
+             overflow-y: auto;
+         }
+     </style>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
       <title>Grade Ambiciosa</title>
@@ -11,23 +17,11 @@
    </head>
    <body class="hold-transition sidebar-mini">
       <div class="wrapper">
-         <nav class="main-header navbar navbar-expand navbar-white navbar-light">
-            <ul class="navbar-nav">
-               <li class="nav-item">
-                  <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-               </li>
-            </ul>
-         </nav>
-         <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <a href="#" class="brand-link">
-            <span class="brand-text font-weight-light">Grade Ambiciosa</span>
-            </a>
-         </aside>
-         <div class="content-wrapper">
+         <div class="content-wrapper" style="margin-left: 0;"">
             <div class="content-header">
                <div class="container-fluid">
                   <div class="row mb-2">
-                     <div class="col-sm-6">
+                     <div class="col-sm-12">
                         <h1 class="m-0">Grade Ambiciosa</h1>
                      </div>
                   </div>
@@ -42,12 +36,18 @@
                              <h3 class="card-title">Selecione entre as turmas abaixo</h3>
                            </div>
                            <form method="post">
+                              {% csrf_token %}
+                              <div class="card-header">
+                                 {{ form.search.label_tag }}
+                                 {{ form.search }}
+                                 <button type="submit" class="btn btn-primary" >Buscar</button>
+                              </div>
                               <div class="card-body">
-                                 {% csrf_token %}
-                                 {{ form }}
+                                 {{ form.choices }}   
                               </div>
                               <div class="card-footer">
                                  <button type="submit" class="btn btn-primary">Submit</button>
+                                 <button name="limpar" value="True" type="submit" class="btn btn-primary">Limpar Seleções</button>
                                </div>
                            </form>
                          </div>
@@ -60,7 +60,7 @@
                               </div>
                               <div class="card-body">
                                     {% for r in resultado %}
-                                       {{ r.nome }} | {{ r.professor }}<br>
+                                       {{ r.nome }} | {{ r.professor }} | {{ r.strHorario }}<br>
                                     {% endfor %}
                                  </div>
                               </div>
